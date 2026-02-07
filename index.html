@@ -6,7 +6,7 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body class="space">
-
+<div class="notice" id="noticeBar"></div>
   <div class="center">
     <h1 class="title">VOID BOT</h1>
 
@@ -17,5 +17,155 @@
   </div>
 <canvas id="stars"></canvas>
 <script src="stars.js"></script>
+<div class="update-ticker">
+ <div class="update-track">
+  <div><span class="new">NEW</span> 🛠 v1.4.2 명령어 검색 기능 추가</div>
+  <div>📈 주식 랭킹 시스템 업데이트</div>
+  <div>🎣 낚시 랭킹 보상 개선</div>
+  <div>👁 링크 감지 정확도 향상</div>
+</div>
+</div>
+<script>
+const track = document.querySelector(".update-track");
+let index = 0;
+
+setInterval(() => {
+  index++;
+  if (index >= track.children.length) index = 0;
+  track.style.transform = `translateY(-${index * 32}px)`;
+}, 3000);
+</script>
+<script>
+const cmds = ["!낚시", "!주식목록", "!전투", "!출석", "!랭킹"];
+const today = new Date().getDate();
+document.getElementById("todayCmd").innerText = cmds[today % cmds.length];
+</script>
+<button class="admin-btn" onclick="openAdmin()">
+  🔒 관리자
+</button>
+<div class="admin-modal" id="adminModal">
+  <div class="admin-box">
+    <h3>🔐 관리자 키 입력</h3>
+    <input type="password" id="adminKey" placeholder="관리자 키">
+    <button onclick="checkKey()">확인</button>
+  </div>
+</div>
+<script>
+const ADMIN_KEY = "VOID-ADMIN-2026"; // ← 바꿔라
+
+function openAdmin() {
+  document.getElementById("adminModal").style.display = "flex";
+}
+
+function checkKey() {
+  const input = document.getElementById("adminKey").value;
+
+  if (input === ADMIN_KEY) {
+    document.getElementById("adminModal").style.display = "none";
+    openAdminPanel();
+  } else {
+    alert("키가 올바르지 않습니다.");
+  }
+}
+</script>
+<div class="admin-panel" id="adminPanel">
+  <h2>📊 접속 기록</h2>
+  <ul id="logList"></ul>
+  <button onclick="closeAdmin()">닫기</button>
+</div>
+<script>
+// 접속 기록 저장
+const logs = JSON.parse(localStorage.getItem("visitLogs") || "[]");
+logs.push({
+  time: new Date().toLocaleString(),
+  ua: navigator.userAgent
+});
+localStorage.setItem("visitLogs", JSON.stringify(logs));
+
+function openAdminPanel() {
+  document.getElementById("adminPanel").style.display = "block";
+  const list = document.getElementById("logList");
+  list.innerHTML = "";
+
+  logs.slice(-10).reverse().forEach(log => {
+    const li = document.createElement("li");
+    li.innerText = `${log.time}`;
+    list.appendChild(li);
+  });
+}
+
+function closeAdmin() {
+  document.getElementById("adminPanel").style.display = "none";
+}
+</script>
+<div class="admin-panel" id="adminPanel">
+  <h2>📊 관리자 대시보드</h2>
+
+  <div class="stats">
+    <div>👥 총 방문: <span id="totalVisit">0</span></div>
+    <div>🕒 최근 24시간: <span id="todayVisit">0</span></div>
+    <div>📱 모바일 비율: <span id="mobileRate">0%</span></div>
+  </div>
+
+  <h3>📄 페이지 방문</h3>
+  <ul id="pageStats"></ul>
+
+  <button onclick="closeAdmin()">닫기</button>
+</div>
+
+<script>
+// 방문 기록 구조
+const visits = JSON.parse(localStorage.getItem("visits") || "[]");
+const now = Date.now();
+const page = location.pathname.split("/").pop() || "index";
+
+visits.push({
+  time: now,
+  page,
+  mobile: /Mobi|Android/i.test(navigator.userAgent)
+});
+localStorage.setItem("visits", JSON.stringify(visits));
+</script>
+<script>
+function openAdminPanel() {
+  document.getElementById("adminPanel").style.display = "block";
+  document.body.classList.add("admin-mode");
+
+  const data = JSON.parse(localStorage.getItem("visits") || "[]");
+
+  document.getElementById("totalVisit").innerText = data.length;
+
+  const dayAgo = Date.now() - 86400000;
+  document.getElementById("todayVisit").innerText =
+    data.filter(v => v.time > dayAgo).length;
+
+  const mobileCount = data.filter(v => v.mobile).length;
+  document.getElementById("mobileRate").innerText =
+    data.length ? Math.round((mobileCount / data.length) * 100) + "%" : "0%";
+
+  const pages = {};
+  data.forEach(v => pages[v.page] = (pages[v.page] || 0) + 1);
+
+  const list = document.getElementById("pageStats");
+  list.innerHTML = "";
+  Object.keys(pages).forEach(p => {
+    const li = document.createElement("li");
+    li.innerText = `${p} : ${pages[p]}회`;
+    list.appendChild(li);
+  });
+}
+</script>
+<script>
+const NOTICE_KEY = "adminNotice";
+
+function setNotice(text) {
+  localStorage.setItem(NOTICE_KEY, text);
+  document.getElementById("noticeBar").innerText = text;
+}
+
+document.getElementById("noticeBar").innerText =
+  localStorage.getItem(NOTICE_KEY) || "📢 현재 공지 없음";
+</script>
+
 </body>
 </html>

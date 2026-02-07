@@ -7,6 +7,12 @@
 </head>
 <body class="space scroll">
 <h1>🤖 봇 가이드</h1>
+<input
+  type="text"
+  id="cmdSearch"
+  placeholder="🔍 명령어 검색 (예: 낚시, 주식, !전투)"
+  class="search"
+/>
 <div class="note">
   📢 사용 전 참고사항<br>
   저희 방에 들어와주시면 감사하겠습니다!<br>
@@ -136,6 +142,31 @@
   <li>!초기화 → 전체 데이터 초기화</li>
 </ul>
   <a href="index.html" class="btn back">← 메인으로</a>
+<script>
+const searchInput = document.getElementById("cmdSearch");
+const items = document.querySelectorAll("li, h2");
+
+searchInput.addEventListener("input", () => {
+  const value = searchInput.value.toLowerCase();
+
+  items.forEach(el => {
+    el.style.display = el.textContent.toLowerCase().includes(value)
+      ? ""
+      : "none";
+  });
+});
+</script>
+<script>
+document.querySelectorAll(".copy").forEach(item => {
+  item.addEventListener("click", () => {
+    navigator.clipboard.writeText(item.dataset.cmd);
+    item.innerText = "✅ 복사됨!";
+    setTimeout(() => {
+      item.innerText = item.dataset.cmd + " → 낚시 진행";
+    }, 800);
+  });
+});
+</script>
 
 </body>
 </html>
